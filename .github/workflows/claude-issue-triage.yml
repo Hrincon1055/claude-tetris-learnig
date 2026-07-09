@@ -21,7 +21,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: '--allowedTools Bash(gh issue *)'
+          claude_args: '--allowedTools Bash(gh issue *),Bash(gh label *)'
           prompt: |
             You are a GitHub issue formatter for a Tetris game project (vanilla JS/HTML/CSS, no dependencies).
 
@@ -40,6 +40,11 @@ jobs:
                - `good first issue` — simple, beginner-friendly task
                - `duplicate` — if it seems like a known/repeated problem
 
+               Applying labels correctly:
+               - A label can only be applied if it already exists in the repository. Run `gh label list --repo ${{ github.repository }}` first to see which labels exist.
+               - If a label you want to apply does not exist yet, create it before applying it, e.g. `gh label create "enhancement" --repo ${{ github.repository }}` (add `--color` and `--description` if you like). Otherwise `gh issue edit --add-label` will fail.
+               - Apply every relevant label in a single `gh issue edit ... --add-label "a" --add-label "b"` call and confirm the command succeeds.
+
             2. **Post a comment** on the issue that includes:
                - A brief, friendly summary of what the issue is about (1-2 sentences)
                - A "Formatted Report" section with:
@@ -50,7 +55,17 @@ jobs:
                  - **Suggested labels**: the labels you applied and why
                - A closing note thanking the contributor
 
+            **Comment formatting**: The comment body MUST be written in GitHub Flavored Markdown (GFM) so it renders nicely on GitHub. Use Markdown features such as:
+               - `##`/`###` headings for sections (e.g. the "Formatted Report" section)
+               - `**bold**` for field names and `-`/`1.` lists for steps and labels
+               - fenced code blocks (```) for any code, commands, or console/error output
+               - `` `inline code` `` for identifiers, labels, file names and values
+               - tables, blockquotes (`>`) or task lists (`- [ ]`) where they improve clarity
+            Do not paste raw unformatted text; always structure the comment with Markdown.
+
             Use the `gh` CLI to apply labels and post the comment. Example commands:
+              gh label list --repo ${{ github.repository }}
+              gh label create "enhancement" --repo ${{ github.repository }}
               gh issue edit ${{ github.event.issue.number }} --add-label "bug" --repo ${{ github.repository }}
               gh issue comment ${{ github.event.issue.number }} --body "..." --repo ${{ github.repository }}
 
